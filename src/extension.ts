@@ -2,26 +2,58 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+import * as path from 'path';
+import { workspace, ExtensionContext } from 'vscode';
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "stexls-vscode-client" is now active!');
+import {
+	LanguageClient,
+	LanguageClientOptions,
+	ServerOptions,
+} from 'vscode-languageclient';
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('stexls-vscode-client.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+let client: LanguageClient;
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from stexls-vscode-client!');
-	});
+export function activate(context: ExtensionContext) {
+	console.log('Activating client...');
+	// If the extension is launched in debug mode then the debug server options are used
+	// Otherwise the run options are used
+	let serverOptions: ServerOptions = {
+		command: 'python',
+		args: ['-m', 'stexls', 'lsp',],
+		debug: {
+			command: 'python',
+			args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug']
+		}
+	};
 
-	context.subscriptions.push(disposable);
+	// Options to control the language client
+	let clientOptions: LanguageClientOptions = {
+		// Register the server for plain text documents
+		documentSelector: [{ scheme: 'file', language: 'latex' }],
+		synchronize: {
+			// Notify the server about file changes to '.clientrc files contained in the workspace
+			fileEvents: workspace.createFileSystemWatcher('**/stexls.settings')
+		}
+	};
+
+	// Create the language client and start the client.
+	client = new LanguageClient(
+		'stexls',
+		'stexls',
+		serverOptions,
+		clientOptions
+	);
+	
+	console.log('Starting client...');
+	// Start the client. This will also launch the server
+	client.start();
+	console.log('Client started.');
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate(): Thenable<void> | undefined {
+	if (!client) {
+		return undefined;
+	}
+	console.log('Stopping client.');
+	return client.stop();
+}
