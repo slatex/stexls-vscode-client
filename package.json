@@ -1,4 +1,5 @@
 {
+    "publisher": "marian",
 	"name": "stexls-vscode-client",
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
