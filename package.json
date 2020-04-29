@@ -7,7 +7,7 @@
 	},
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
