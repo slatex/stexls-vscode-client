@@ -32,7 +32,7 @@ export function activate(context: ExtensionContext) {
     let serverOptions: ServerOptions = {
         run: {
             command: "python",
-            args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug'],
+            args: ['-m', 'stexls', 'lsp', '--loglevel', 'error'],
             transport: TransportKind.ipc,
         },
         debug: {
