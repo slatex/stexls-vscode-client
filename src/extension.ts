@@ -6,48 +6,65 @@ import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
 
 import {
-	LanguageClient,
-	LanguageClientOptions,
-	ServerOptions,
+    LanguageClient,
+    LanguageClientOptions,
+    ServerOptions,
+    TransportKind,
 } from 'vscode-languageclient';
 
 let client: LanguageClient;
 
+import * as cp from 'child_process';
+
 export function activate(context: ExtensionContext) {
-	console.log('Activating client...');
-	// If the extension is launched in debug mode then the debug server options are used
-	// Otherwise the run options are used
-	let serverOptions: ServerOptions = {
-		command: 'python',
-		args: ['-m', 'stexls', 'lsp',],
-		debug: {
-			command: 'python',
-			args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug']
-		}
-	};
+    console.log('Activating stexls client...');
 
-	// Options to control the language client
-	let clientOptions: LanguageClientOptions = {
-		// Register the server for plain text documents
-		documentSelector: [{ scheme: 'file', language: 'latex' }],
-	};
+    console.log('Checking stexls version:');
+    
+    console.log('>>> python -m stexls --version');
 
-	// Create the language client and start the client.
-	client = new LanguageClient(
-		'stexls',
-		'stexls',
-		serverOptions,
-		clientOptions
-	);
-	
-	client.start();
-	console.log('Client started.');
+    let out = cp.execSync('python -m stexls --version');
+
+    console.log(out);
+
+    // If the extension is launched in debug mode then the debug server options are used
+    // Otherwise the run options are used
+    let serverOptions: ServerOptions = {
+        run: {
+            command: "python",
+            args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug'],
+            transport: TransportKind.ipc,
+        },
+        debug: {
+            command: 'python',
+            args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug'],
+            transport: TransportKind.ipc,
+        }
+    };
+
+    // Options to control the language client
+    let clientOptions: LanguageClientOptions = {
+        // Register the server for plain text documents
+        documentSelector: [{ scheme: 'file', language: 'latex' }],
+    };
+
+    // Create the language client and start the client.
+    client = new LanguageClient(
+        'stexls',
+        'stexls',
+        serverOptions,
+        clientOptions
+    );
+
+    console.log('Starting client...');
+    client.start();
+    console.log('Client started.');
 }
 
 export function deactivate(): Thenable<void> | undefined {
-	if (!client) {
-		return undefined;
-	}
-	console.log('Stopping client.');
-	return client.stop();
+    if (!client) {
+        return undefined;
+    }
+    console.log('Stopping client.');
+    return client.stop();
 }
