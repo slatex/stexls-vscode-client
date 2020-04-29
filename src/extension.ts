@@ -30,10 +30,6 @@ export function activate(context: ExtensionContext) {
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
 		documentSelector: [{ scheme: 'file', language: 'latex' }],
-		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/stexls.settings')
-		}
 	};
 
 	// Create the language client and start the client.
@@ -44,8 +40,6 @@ export function activate(context: ExtensionContext) {
 		clientOptions
 	);
 	
-	console.log('Starting client...');
-	// Start the client. This will also launch the server
 	client.start();
 	console.log('Client started.');
 }
