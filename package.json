@@ -1,6 +1,10 @@
 {
     "publisher": "marian",
 	"name": "stexls-vscode-client",
+	"repository":{
+		"type": "git",
+		"url": "https://gl.kwarc.info/Marian6814/stexls-vscode-client"
+	},
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
 	"version": "0.0.1",
