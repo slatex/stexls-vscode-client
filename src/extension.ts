@@ -25,7 +25,7 @@ export function activate(context: ExtensionContext) {
 
     let out = cp.execSync('python -m stexls --version');
 
-    console.log(out);
+    console.log(out.toString());
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
