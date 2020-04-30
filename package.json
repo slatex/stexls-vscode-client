@@ -7,7 +7,7 @@
 	},
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -19,6 +19,23 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration":{
+			"title": "stexls",
+			"properties": {
+				"stexls.pythonInterpreter": {
+					"type": "string",
+					"default": "python3",
+					"description": "The python executable used to starts the server. The selected interpreter must have the stexls package installed. This setting can be the complete path to the interpreter executable."
+				},
+				"stexls.stexlsCommand": {
+					"type": "array",
+					"default": [
+						"-m", "stexls", "lsp", "--transport-kind", "ipc", "--loglevel", "error", "--logfile", "/tmp/stexls.log"
+					],
+					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

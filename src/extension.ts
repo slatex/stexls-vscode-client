@@ -15,29 +15,50 @@ import {
 let client: LanguageClient;
 
 import * as cp from 'child_process';
+import { settings } from 'cluster';
 
 export function activate(context: ExtensionContext) {
     console.log('Activating stexls client...');
+    
+    const config = vscode.workspace.getConfiguration("stexls");
+
+    const interpreter = config.get<string>("pythonInterpreter");
+
+    if (!interpreter) {
+        throw Error("Python interpreter not selected. Unable to start language server.");
+    }
 
     console.log('Checking stexls version:');
     
-    console.log('>>> python -m stexls --version');
+    console.log(`>>> ${interpreter} -m stexls --version`);
 
-    let out = cp.execSync('python -m stexls --version');
+    const out = cp.execSync(`${interpreter} -m stexls --version`);
 
     console.log(out.toString());
+
+    if (!out) {
+        throw Error(`Stexls version check returned falsy "${out}".`);
+    }
+
+    const args = config.get<string[]>("stexlsCommand");
+
+    if (!args) {
+        throw Error(`Unable to get stexls command arguments. Settings "stexlsCommand" returned falsy: ${args}`);
+    }
+
+    const debugArgs = [...args, "--loglevel", "debug"];
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
     let serverOptions: ServerOptions = {
         run: {
-            command: "python",
-            args: ['-m', 'stexls', 'lsp', '--loglevel', 'error'],
+            command: interpreter,
+            args: args,
             transport: TransportKind.ipc,
         },
         debug: {
-            command: 'python',
-            args: ['-m', 'stexls', 'lsp', '--loglevel', 'debug'],
+            command: interpreter,
+            args: debugArgs,
             transport: TransportKind.ipc,
         }
     };
