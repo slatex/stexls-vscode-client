@@ -1,7 +1,7 @@
 {
-    "publisher": "marian",
+	"publisher": "marian",
 	"name": "stexls-vscode-client",
-	"repository":{
+	"repository": {
 		"type": "git",
 		"url": "https://gl.kwarc.info/Marian6814/stexls-vscode-client"
 	},
@@ -19,7 +19,7 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"configuration":{
+		"configuration": {
 			"title": "stexls",
 			"properties": {
 				"stexls.pythonInterpreter": {
@@ -30,7 +30,15 @@
 				"stexls.stexlsCommand": {
 					"type": "array",
 					"default": [
-						"-m", "stexls", "lsp", "--transport-kind", "ipc", "--loglevel", "error", "--logfile", "/tmp/stexls.log"
+						"-m",
+						"stexls",
+						"lsp",
+						"--transport-kind",
+						"ipc",
+						"--loglevel",
+						"error",
+						"--logfile",
+						"/tmp/stexls.log"
 					],
 					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
 				}

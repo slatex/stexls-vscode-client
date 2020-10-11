@@ -2,9 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
-
 import {
     LanguageClient,
     LanguageClientOptions,
@@ -13,28 +10,32 @@ import {
 } from 'vscode-languageclient';
 
 let client: LanguageClient;
+let channel: vscode.OutputChannel;
 
 import * as cp from 'child_process';
-import { settings } from 'cluster';
+import { join } from 'path';
 
-export function activate(context: ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
     console.log('Activating stexls client...');
-    
+
     const config = vscode.workspace.getConfiguration("stexls");
 
     const interpreter = config.get<string>("pythonInterpreter");
+
+    channel = vscode.window.createOutputChannel('stexls');
+    channel.show(true);
 
     if (!interpreter) {
         throw Error("Python interpreter not selected. Unable to start language server.");
     }
 
-    console.log('Checking stexls version:');
-    
-    console.log(`>>> ${interpreter} -m stexls --version`);
+    const versionCmd = `${interpreter} -m stexls --version`;
 
-    const out = cp.execSync(`${interpreter} -m stexls --version`);
+    channel.appendLine(`>>> ${versionCmd}`);
 
-    console.log(out.toString());
+    const out = cp.execSync(versionCmd);
+
+    channel.appendLine(out.toString());
 
     if (!out) {
         throw Error(`Stexls version check returned falsy "${out}".`);
@@ -47,6 +48,8 @@ export function activate(context: ExtensionContext) {
     }
 
     const debugArgs = [...args, "--loglevel", "debug"];
+
+    channel.appendLine(['>>>', interpreter, ...args].join(' '));
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
@@ -83,6 +86,9 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
+    if (channel) {
+        channel.dispose();
+    }
     if (!client) {
         return undefined;
     }
