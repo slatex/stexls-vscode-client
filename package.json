@@ -52,7 +52,7 @@
 				},
 				"stexls.delay": {
 					"type": "number",
-					"default": 1.0,
+					"default": 2.0,
 					"minimum": 1.0,
 					"maximum": 10.0,
 					"description": "Delays linting after a change to a file is made. (Value in seconds)"
