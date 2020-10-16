@@ -64,7 +64,7 @@
 				},
 				"stexls.loglevel": {
 					"type": "string",
-					"enum": ["error", "warning", "information"],
+					"enum": ["critical", "error", "warning", "info", "debug"],
 					"default": "error",
 					"description": "The maximum log level. Setting it to 'error' will only log errors, but 'information' will log 'warning' and 'errors' as well."
 				}
