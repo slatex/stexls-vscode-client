@@ -7,7 +7,7 @@
 	},
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -37,6 +37,11 @@
 						"ipc"
 					],
 					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
+				},
+				"stexls.compileWorkspace": {
+					"type": "boolean",
+					"default": false,
+					"description": "The server will compile every file in the workspace on startup if enabled. This will take advantage of multiprocessing and @stexls.numJobs to speed it up. The server will be able to make diagnostics based on every file and symbol in the workspace."
 				},
 				"stexls.numJobs": {
 					"type": "integer",

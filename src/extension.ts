@@ -13,7 +13,6 @@ let client: LanguageClient;
 let channel: vscode.OutputChannel;
 
 import * as cp from 'child_process';
-import { join } from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Activating stexls client...');
@@ -51,8 +50,12 @@ export function activate(context: vscode.ExtensionContext) {
     const delay = ['--update_delay_seconds', config.get<string>('delay', '1.0')];
     const logfile = ['--logfile', config.get<string>('logfile', '/tmp/stexls.log')];
     const loglevel = ['--loglevel', config.get<string>('loglevel', 'error')];
-    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...loglevel];
-    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, "--loglevel", "debug"];
+    let compileWorkspace: string[] = []
+    if (config.get<boolean>('compileWorkspace')) {
+        compileWorkspace = ['--enable_global_validation']
+    }
+    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...loglevel];
+    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, "--loglevel", "debug"];
 
     channel.appendLine(['>>>', interpreter, ...runArgs].join(' '));
 
