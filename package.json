@@ -7,7 +7,7 @@
 	},
 	"displayName": "stexls-vscode-client",
 	"description": "VSCode client for the stex language server",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -27,20 +27,41 @@
 					"default": "python3",
 					"description": "The python executable used to starts the server. The selected interpreter must have the stexls package installed. This setting can be the complete path to the interpreter executable."
 				},
-				"stexls.stexlsCommand": {
+				"stexls.command": {
 					"type": "array",
 					"default": [
 						"-m",
 						"stexls",
 						"lsp",
 						"--transport-kind",
-						"ipc",
-						"--loglevel",
-						"error",
-						"--logfile",
-						"/tmp/stexls.log"
+						"ipc"
 					],
 					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
+				},
+				"stexls.numJobs": {
+					"type": "integer",
+					"default": 1,
+					"minimum": 1,
+					"maximum": 8,
+					"description": "Number of processes used for compilation of the workspace."
+				},
+				"stexls.delay": {
+					"type": "number",
+					"default": 1.0,
+					"minimum": 1.0,
+					"maximum": 10.0,
+					"description": "Delays linting after a change to a file is made. (Value in seconds)"
+				},
+				"stexls.logfile": {
+					"type": "string",
+					"default": "/tmp/stexls.log",
+					"description": "Path to logfile used by the server."
+				},
+				"stexls.loglevel": {
+					"type": "string",
+					"enum": ["error", "warning", "information"],
+					"default": "error",
+					"description": "The maximum log level. Setting it to 'error' will only log errors, but 'information' will log 'warning' and 'errors' as well."
 				}
 			}
 		}

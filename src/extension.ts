@@ -41,22 +41,27 @@ export function activate(context: vscode.ExtensionContext) {
         throw Error(`Stexls version check returned falsy "${out}".`);
     }
 
-    const args = config.get<string[]>("stexlsCommand");
+    const args = config.get<string[]>("command");
 
     if (!args) {
         throw Error(`Unable to get stexls command arguments. Settings "stexlsCommand" returned falsy: ${args}`);
     }
 
-    const debugArgs = [...args, "--loglevel", "debug"];
+    const numJobs = ['--num_jobs', config.get<string>('numJobs', '1')];
+    const delay = ['--update_delay_seconds', config.get<string>('delay', '1.0')];
+    const logfile = ['--logfile', config.get<string>('logfile', '/tmp/stexls.log')];
+    const loglevel = ['--loglevel', config.get<string>('loglevel', 'error')];
+    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...loglevel];
+    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, "--loglevel", "debug"];
 
-    channel.appendLine(['>>>', interpreter, ...args].join(' '));
+    channel.appendLine(['>>>', interpreter, ...runArgs].join(' '));
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
     let serverOptions: ServerOptions = {
         run: {
             command: interpreter,
-            args: args,
+            args: runArgs,
             transport: TransportKind.ipc,
         },
         debug: {
@@ -70,6 +75,8 @@ export function activate(context: vscode.ExtensionContext) {
     let clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
         documentSelector: [{ scheme: 'file', language: 'latex' }],
+        outputChannel: channel,
+        traceOutputChannel: channel
     };
 
     // Create the language client and start the client.
