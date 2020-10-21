@@ -29,15 +29,24 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const versionCmd = `${interpreter} -m stexls --version`;
-
-    channel.appendLine(`>>> ${versionCmd}`);
-
+    channel.appendLine(versionCmd);
     const out = cp.execSync(versionCmd);
-
     channel.appendLine(out.toString());
 
     if (!out) {
         throw Error(`Stexls version check returned falsy "${out}".`);
+    }
+
+    const [major, minor, revision] = out.toString().split('.');
+    const minMinorVersion = 1;
+    const expectedMajorVersion = 4;
+
+    if (parseInt(major) !== expectedMajorVersion) {
+        throw Error(`Server major version condition not met: Is ${major}, expected ${expectedMajorVersion}`);
+    }
+
+    if (parseInt(minor) < minMinorVersion) {
+        throw Error(`Server minor version condition not met: Is ${minor}, client requries minor>=${minMinorVersion}`);
     }
 
     const args = config.get<string[]>("command");
@@ -50,9 +59,9 @@ export function activate(context: vscode.ExtensionContext) {
     const delay = ['--update_delay_seconds', config.get<string>('delay', '1.0')];
     const logfile = ['--logfile', config.get<string>('logfile', '/tmp/stexls.log')];
     const loglevel = ['--loglevel', config.get<string>('loglevel', 'error')];
-    let compileWorkspace: string[] = []
+    let compileWorkspace: string[] = [];
     if (config.get<boolean>('compileWorkspace')) {
-        compileWorkspace = ['--enable_global_validation']
+        compileWorkspace = ['--enable_global_validation'];
     }
     const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...loglevel];
     const debugArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, "--loglevel", "debug"];
