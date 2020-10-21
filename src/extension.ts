@@ -38,7 +38,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const [major, minor, revision] = out.toString().split('.');
-    const minMinorVersion = 1;
+    const minMinorVersion = 2;
     const expectedMajorVersion = 4;
 
     if (parseInt(major) !== expectedMajorVersion) {
@@ -63,8 +63,12 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.get<boolean>('compileWorkspace')) {
         compileWorkspace = ['--enable_global_validation'];
     }
-    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...loglevel];
-    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, "--loglevel", "debug"];
+    let lintOnStartup: string[] = [];
+    if (config.get<boolean>('lintWorkspaceOnStartup', false)) {
+        lintOnStartup = ['--lint_workspace_on_startup'];
+    }
+    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, ...loglevel];
+    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, "--loglevel", "debug"];
 
     channel.appendLine(['>>>', interpreter, ...runArgs].join(' '));
 

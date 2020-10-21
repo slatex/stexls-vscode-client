@@ -43,6 +43,11 @@
 					"default": false,
 					"description": "The server will compile every file in the workspace on startup if enabled. This will take advantage of multiprocessing and @stexls.numJobs to speed it up. The server will be able to make diagnostics based on every file and symbol in the workspace."
 				},
+				"stexls.lintWorkspaceOnStartup": {
+					"type": "boolean",
+					"default": false,
+					"description": "Lint every file in the workspace on startup."
+				},
 				"stexls.numJobs": {
 					"type": "integer",
 					"default": 2,
