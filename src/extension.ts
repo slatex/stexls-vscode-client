@@ -13,6 +13,7 @@ let client: LanguageClient;
 let channel: vscode.OutputChannel;
 
 import * as cp from 'child_process';
+import { extname } from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Activating stexls client...');
@@ -38,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const [major, minor, revision] = out.toString().split('.');
-    const minMinorVersion = 2;
+    const minMinorVersion = 3;
     const expectedMajorVersion = 4;
 
     if (parseInt(major) !== expectedMajorVersion) {
@@ -67,8 +68,13 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.get<boolean>('lintWorkspaceOnStartup', false)) {
         lintOnStartup = ['--lint_workspace_on_startup'];
     }
-    const runArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, ...loglevel];
-    const debugArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, "--loglevel", "debug"];
+    let enableTrefier: string[] = [];
+    if (config.get<boolean>('enableTrefier', false)) {
+        enableTrefier = ['--enable_trefier'];
+    }
+    const sharedArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, ...enableTrefier];
+    const runArgs = [...sharedArgs, ...loglevel];
+    const debugArgs = [...sharedArgs, "--loglevel", "debug"];
 
     channel.appendLine(['>>>', interpreter, ...runArgs].join(' '));
 
