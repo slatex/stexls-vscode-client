@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const [major, minor, revision] = out.toString().split('.');
-    const minMinorVersion = 3;
+    const minMinorVersion = 4;
     const expectedMajorVersion = 4;
 
     if (parseInt(major) !== expectedMajorVersion) {
@@ -72,6 +72,10 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.get<boolean>('enableTrefier', false)) {
         enableTrefier = ['--enable_trefier'];
     }
+    let lintRelatedFiles: string[] = [];
+    if (config.get<boolean>('enabelLintingOfRelatedFiles', false)) {
+        lintRelatedFiles = ['--enable_linting_of_related_files'];
+    }
     const sharedArgs = [
         ...args,
         ...numJobs,
@@ -79,7 +83,8 @@ export function activate(context: vscode.ExtensionContext) {
         ...logfile,
         ...compileWorkspace,
         ...lintOnStartup,
-        ...enableTrefier
+        ...enableTrefier,
+        ...lintRelatedFiles
     ];
     const runArgs = [...sharedArgs, ...loglevel];
     const debugArgs = [...sharedArgs, "--loglevel", "debug"];
