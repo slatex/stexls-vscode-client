@@ -27,17 +27,6 @@
 					"default": "python3",
 					"description": "The python executable used to starts the server. The selected interpreter must have the stexls package installed. This setting can be the complete path to the interpreter executable."
 				},
-				"stexls.command": {
-					"type": "array",
-					"default": [
-						"-m",
-						"stexls",
-						"lsp",
-						"--transport-kind",
-						"ipc"
-					],
-					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
-				},
 				"stexls.compileWorkspaceOnStartup": {
 					"type": "boolean",
 					"default": false,
@@ -65,12 +54,12 @@
 					"default": 2,
 					"minimum": 1,
 					"maximum": 10,
-					"description": "Delays linting after a change to a file is made. (Value in seconds)"
+					"description": "Delay when buffering linting jobs. Linting is buffered for <value> seconds after the user stops typing, opens a file or saves."
 				},
 				"stexls.logfile": {
 					"type": "string",
 					"default": "/tmp/stexls.log",
-					"description": "Path to logfile used by the server."
+					"description": "Path to logfile used by the server. Logs information according to loglevel in this file."
 				},
 				"stexls.loglevel": {
 					"type": "string",
@@ -83,6 +72,17 @@
 					],
 					"default": "error",
 					"description": "The maximum log level. Setting it to 'error' will only log errors, but 'info' will log 'warning' and 'errors' as well."
+				},
+				"stexls.command": {
+					"type": "array",
+					"default": [
+						"-m",
+						"stexls",
+						"lsp",
+						"--transport-kind",
+						"ipc"
+					],
+					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. This should never have to change."
 				}
 			}
 		}
