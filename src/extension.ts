@@ -57,11 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const numJobs = ['--num_jobs', config.get<string>('numJobs', '1')];
-    const delay = ['--update_delay_seconds', config.get<string>('delay', '1.0')];
+    const delay = ['--update_delay_seconds', config.get<string>('delay', '2.0')];
     const logfile = ['--logfile', config.get<string>('logfile', '/tmp/stexls.log')];
     const loglevel = ['--loglevel', config.get<string>('loglevel', 'error')];
     let compileWorkspace: string[] = [];
-    if (config.get<boolean>('compileWorkspace')) {
+    if (config.get<boolean>('compileWorkspaceOnStartup')) {
         compileWorkspace = ['--enable_global_validation'];
     }
     let lintOnStartup: string[] = [];
@@ -72,7 +72,15 @@ export function activate(context: vscode.ExtensionContext) {
     if (config.get<boolean>('enableTrefier', false)) {
         enableTrefier = ['--enable_trefier'];
     }
-    const sharedArgs = [...args, ...numJobs, ...delay, ...logfile, ...compileWorkspace, ...lintOnStartup, ...enableTrefier];
+    const sharedArgs = [
+        ...args,
+        ...numJobs,
+        ...delay,
+        ...logfile,
+        ...compileWorkspace,
+        ...lintOnStartup,
+        ...enableTrefier
+    ];
     const runArgs = [...sharedArgs, ...loglevel];
     const debugArgs = [...sharedArgs, "--loglevel", "debug"];
 

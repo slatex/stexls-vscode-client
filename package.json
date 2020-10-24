@@ -38,7 +38,7 @@
 					],
 					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. The 'transport-kind' argument should never be changed."
 				},
-				"stexls.compileWorkspace": {
+				"stexls.compileWorkspaceOnStartup": {
 					"type": "boolean",
 					"default": false,
 					"description": "The server will compile every file in the workspace on startup if enabled. This will take advantage of multiprocessing and @stexls.numJobs to speed it up. The server will be able to make diagnostics based on every file and symbol in the workspace."
@@ -55,7 +55,7 @@
 				},
 				"stexls.numJobs": {
 					"type": "integer",
-					"default": 2,
+					"default": 1,
 					"minimum": 1,
 					"maximum": 8,
 					"description": "Number of processes used for compilation of the workspace."
