@@ -6,7 +6,7 @@ This is a client for the stexls language server.
 # Requirements
 
 You need to install the language server by follwing the installation instructions
-at https://gl.kwarc.info/Marian6814/stexls.git.
+at [https://github.com/slatex/stexls](https://github.com/slatex/stexls).
 
 
 # Installation
