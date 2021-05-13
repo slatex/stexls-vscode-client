@@ -21,26 +21,59 @@ export function activate(context: vscode.ExtensionContext) {
     const config = vscode.workspace.getConfiguration("stexls");
 
     const interpreter = config.get<string>("pythonInterpreter");
+    const stexlsInstallOptions = config.get<string[]>("stexlsInstallOptions");
+    const logfile = config.get<string>('logfile', '/tmp/stexls.log');
+    const loglevel = config.get<string>('loglevel', 'error');
 
     channel = vscode.window.createOutputChannel('stexls');
+    context.subscriptions.push(channel);
     channel.show(true);
 
     if (!interpreter) {
+        vscode.window.showErrorMessage("You have not selected a python interpreter for Stexls. Open your settings UI and search for 'stexls>pythonInterpreter'.")
         throw Error("Python interpreter not selected. Unable to start language server.");
     }
 
     const versionCmd = `${interpreter} -m stexls --version`;
-    channel.appendLine(versionCmd);
-    const out = cp.execSync(versionCmd);
+    channel.appendLine(`> ${versionCmd}`);
+    let out: string = "";
+    try {
+        const out = cp.execSync(versionCmd);
+    } catch {
+        vscode.window.showErrorMessage(
+            "Stexls does not seem to be installed with your interpreter. Do you want to automatically install it?",
+            "No",
+            "Yes"
+        ).then(
+            value => {
+                console.log(`Install stexls selection was: ${value}`)
+                if (value == "Yes" && stexlsInstallOptions !== undefined) {
+                    const installArgs = [interpreter, ...stexlsInstallOptions];
+                    const installCmd = installArgs.join(' ');
+                    console.log(`stexls install cmd: ${installCmd}`);
+                    channel.appendLine(`> ${installCmd}`);
+                    channel.show();
+                    cp.exec(installCmd).on("exit", (code, signal) => {
+                        vscode.window.showInformationMessage('If the stexls installation was successfull (view output channel "stexls"), you can restart the application and it should work.');
+                        channel.appendLine(`> ${versionCmd}`)
+                        const version = cp.execSync(versionCmd);
+                        channel.appendLine(version.toString());
+                        if (!version) {
+                            vscode.window.showInformationMessage('Failed to install stexls.')
+                        }
+                    });
+                }
+            }
+        )
+        return
+    }
     channel.appendLine(out.toString());
-
     if (!out) {
         throw Error(`Stexls version check returned falsy "${out}".`);
     }
-
     const [major, minor, revision] = out.toString().split('.');
     const minMinorVersion = 4;
-    const expectedMajorVersion = 4;
+    const expectedMajorVersion = 5;
 
     if (parseInt(major) !== expectedMajorVersion) {
         throw Error(`Server major version condition not met: Is ${major}, expected ${expectedMajorVersion}`);
@@ -55,41 +88,15 @@ export function activate(context: vscode.ExtensionContext) {
     if (!args) {
         throw Error(`Unable to get stexls command arguments. Settings "stexlsCommand" returned falsy: ${args}`);
     }
-
-    const numJobs = ['--num_jobs', config.get<string>('numJobs', '1')];
-    const delay = ['--update_delay_seconds', config.get<string>('delay', '2.0')];
-    const logfile = ['--logfile', config.get<string>('logfile', '/tmp/stexls.log')];
-    const loglevel = ['--loglevel', config.get<string>('loglevel', 'error')];
-    let compileWorkspace: string[] = [];
-    if (config.get<boolean>('compileWorkspaceOnStartup')) {
-        compileWorkspace = ['--enable_global_validation'];
-    }
-    let lintOnStartup: string[] = [];
-    if (config.get<boolean>('lintWorkspaceOnStartup', false)) {
-        lintOnStartup = ['--lint_workspace_on_startup'];
-    }
-    let enableTrefier: string[] = [];
-    if (config.get<boolean>('enableTrefier', false)) {
-        enableTrefier = ['--enable_trefier'];
-    }
-    let lintRelatedFiles: string[] = [];
-    if (config.get<boolean>('enabelLintingOfRelatedFiles', false)) {
-        lintRelatedFiles = ['--enable_linting_of_related_files'];
-    }
     const sharedArgs = [
         ...args,
-        ...numJobs,
-        ...delay,
-        ...logfile,
-        ...compileWorkspace,
-        ...lintOnStartup,
-        ...enableTrefier,
-        ...lintRelatedFiles
+        '--logfile',
+        logfile
     ];
-    const runArgs = [...sharedArgs, ...loglevel];
+    const runArgs = [...sharedArgs, "--loglevel", loglevel];
     const debugArgs = [...sharedArgs, "--loglevel", "debug"];
 
-    channel.appendLine(['>>>', interpreter, ...runArgs].join(' '));
+    channel.appendLine(['>', interpreter, ...runArgs].join(' '));
 
     // If the extension is launched in debug mode then the debug server options are used
     // Otherwise the run options are used
@@ -106,34 +113,36 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
+    const compileWorkspaceOnStartupFileLimit = config.get<number>("compileWorkspaceOnStartupFileLimit");
+    const enableTrefier = config.get<string>("enableTrefier");
+    const enabelLintingOfRelatedFiles = config.get<boolean>("enabelLintingOfRelatedFiles");
+    const numJobs = config.get<number>('numJobs', 1);
+    const delay = config.get<string>('delay', '5.0');
+
     // Options to control the language client
     let clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
         documentSelector: [{ scheme: 'file', language: 'latex' }],
         outputChannel: channel,
-        traceOutputChannel: channel
+        traceOutputChannel: channel,
+        initializationOptions: {
+            "compileWorkspaceOnStartupFileLimit": compileWorkspaceOnStartupFileLimit,
+            "enableTrefier": enableTrefier,
+            "enableLintingOfRelatedFiles": enabelLintingOfRelatedFiles,
+            "numJobs": numJobs,
+            "delay": delay,
+        }
     };
 
     // Create the language client and start the client.
     client = new LanguageClient(
         'stexls',
-        'stexls',
         serverOptions,
-        clientOptions
+        clientOptions,
     );
 
     console.log('Starting client...');
-    client.start();
+    const client_disposable = client.start();
+    context.subscriptions.push(client_disposable)
     console.log('Client started.');
-}
-
-export function deactivate(): Thenable<void> | undefined {
-    if (channel) {
-        channel.dispose();
-    }
-    if (!client) {
-        return undefined;
-    }
-    console.log('Stopping client.');
-    return client.stop();
 }

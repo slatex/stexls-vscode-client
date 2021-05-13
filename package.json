@@ -25,40 +25,48 @@
 				"stexls.pythonInterpreter": {
 					"type": "string",
 					"default": "python3",
-					"description": "The python executable used to starts the server. The selected interpreter must have the stexls package installed. This setting can be the complete path to the interpreter executable. (restart required)"
+					"description": "The python executable used to starts the server. The selected interpreter must have the stexls package installed. If you have the python extension installed, keep in mind that the interpreter you can select there is not shared with this extension. (restart required)"
 				},
-				"stexls.compileWorkspaceOnStartup": {
-					"type": "boolean",
-					"default": false,
-					"description": "The server will compile every file in the workspace on startup if enabled. This will take advantage of multiprocessing and @stexls.numJobs to speed it up. The server will be able to make diagnostics based on every file and symbol in the workspace. This process is cancellable by pressing the 'Cancel' button of the progress display that appears while this process is running. (restart required)"
+				"stexls.stexlsInstallOptions": {
+					"type": "array",
+					"default": [
+						"-m",
+						"pip",
+						"install",
+						"\"git+https://github.com/slatex/stexls.git\""
+					],
+					"description": "Install options for python that install stexls for you."
 				},
-				"stexls.lintWorkspaceOnStartup": {
-					"type": "boolean",
-					"default": false,
-					"description": "Lint every file in the workspace on startup. This is useful if you always want to see all diagnostics on all files from the start. This process may take a long time, but is cancellable at any time. (restart required)"
+				"stexls.compileWorkspaceOnStartupFileLimit": {
+					"type": "integer",
+					"default": 10000,
+					"descriptions": "Maximum number of files the server will pre-compile on startup using multiprocessing with `stexls>numJobs`. Setting this to 0 means, that no files are pre-compiled. Setting it to -1 removes the limit, but that is not recommended. Files outside this limit will still be compiled while you work normally, but without multiprocessing.  (restart required)"
 				},
 				"stexls.enableTrefier": {
-					"type": "boolean",
-					"default": false,
-					"description": "Enables diagnostics based on trefier tagging. Requires installation of the server with the [ml] extras. (restart required)"
+					"type": "string",
+					"default": "enabled",
+					"enum": [
+						"disabled",
+						"enabled",
+						"full"
+					],
+					"description": "Enables diagnostics based on trefier tagging. By default, \"enabled\" only applies the trefier to open files in order to speed everything up. If you want to apply it to all files set this to \"full\". (restart required)"
 				},
 				"stexls.enabelLintingOfRelatedFiles": {
 					"type": "boolean",
-					"default": false,
+					"default": true,
 					"description": "Lint every file that directly or indirectly references a file that was changed. Enable 'Compile Workspace on Startup' for this to work properly. Because only compiled and buffered files are searched. (restart required)"
 				},
 				"stexls.numJobs": {
 					"type": "integer",
 					"default": 1,
 					"minimum": 1,
-					"maximum": 8,
 					"description": "Number of processes used for compilation of the workspace. (restart required)"
 				},
 				"stexls.delay": {
 					"type": "number",
-					"default": 2,
+					"default": 5,
 					"minimum": 1,
-					"maximum": 10,
 					"description": "Delay when buffering linting jobs. Linting is buffered for <value> seconds after the user stops typing, opens a file or saves. (restart required)"
 				},
 				"stexls.logfile": {
@@ -76,7 +84,7 @@
 						"debug"
 					],
 					"default": "error",
-					"description": "The maximum log level. Setting it to 'error' will only log errors, but 'info' will log 'warning' and 'errors' as well. (restart required)"
+					"description": "The maximum log level. \"critical\" will only log critical errors, while \"debug\" will log everything. (restart required)"
 				},
 				"stexls.command": {
 					"type": "array",
