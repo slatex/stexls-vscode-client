@@ -36,10 +36,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const versionCmd = `${interpreter} -m stexls --version`;
     channel.appendLine(`> ${versionCmd}`);
-    let out: string = "";
+    let version: string | undefined = undefined;
     try {
-        const out = cp.execSync(versionCmd);
-    } catch {
+        version = cp.execSync(versionCmd).toString();
+    } catch (err) {
         vscode.window.showErrorMessage(
             "Stexls does not seem to be installed with your interpreter. Do you want to automatically install it?",
             "No",
@@ -56,9 +56,9 @@ export function activate(context: vscode.ExtensionContext) {
                     cp.exec(installCmd).on("exit", (code, signal) => {
                         vscode.window.showInformationMessage('If the stexls installation was successfull (view output channel "stexls"), you can restart the application and it should work.');
                         channel.appendLine(`> ${versionCmd}`)
-                        const version = cp.execSync(versionCmd);
-                        channel.appendLine(version.toString());
-                        if (!version) {
+                        const downloaded_version = cp.execSync(versionCmd);
+                        channel.appendLine(downloaded_version.toString());
+                        if (!downloaded_version) {
                             vscode.window.showInformationMessage('Failed to install stexls.')
                         }
                     });
@@ -67,13 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
         )
         return
     }
-    channel.appendLine(out.toString());
-    if (!out) {
-        throw Error(`Stexls version check returned falsy "${out}".`);
+    channel.appendLine(version);
+    if (!version) {
+        throw Error(`Stexls version check returned falsy "${version}".`);
     }
-    const [major, minor, revision] = out.toString().split('.');
-    const minMinorVersion = 4;
-    const expectedMajorVersion = 5;
+    const [major, minor, revision] = version.split('.');
+    const expectedMajorVersion = 4;
+    const minMinorVersion = 5;
 
     if (parseInt(major) !== expectedMajorVersion) {
         throw Error(`Server major version condition not met: Is ${major}, expected ${expectedMajorVersion}`);
@@ -113,11 +113,11 @@ export function activate(context: vscode.ExtensionContext) {
         }
     };
 
-    const compileWorkspaceOnStartupFileLimit = config.get<number>("compileWorkspaceOnStartupFileLimit");
-    const enableTrefier = config.get<string>("enableTrefier");
-    const enabelLintingOfRelatedFiles = config.get<boolean>("enabelLintingOfRelatedFiles");
+    const compileWorkspaceOnStartupFileLimit = config.get<number>("compileWorkspaceOnStartupFileLimit", 10000);
+    const enableTrefier = config.get<string>("enableTrefier", 'disabled');
+    const enableLintingOfRelatedFiles = config.get<boolean>("enableLintingOfRelatedFiles", false);
     const numJobs = config.get<number>('numJobs', 1);
-    const delay = config.get<string>('delay', '5.0');
+    const delay = config.get<string>('delay', '1.0');
 
     // Options to control the language client
     let clientOptions: LanguageClientOptions = {
@@ -128,7 +128,7 @@ export function activate(context: vscode.ExtensionContext) {
         initializationOptions: {
             "compileWorkspaceOnStartupFileLimit": compileWorkspaceOnStartupFileLimit,
             "enableTrefier": enableTrefier,
-            "enableLintingOfRelatedFiles": enabelLintingOfRelatedFiles,
+            "enableLintingOfRelatedFiles": enableLintingOfRelatedFiles,
             "numJobs": numJobs,
             "delay": delay,
         }

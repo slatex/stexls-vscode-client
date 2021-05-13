@@ -52,7 +52,7 @@
 					],
 					"description": "Enables diagnostics based on trefier tagging. By default, \"enabled\" only applies the trefier to open files in order to speed everything up. If you want to apply it to all files set this to \"full\". (restart required)"
 				},
-				"stexls.enabelLintingOfRelatedFiles": {
+				"stexls.enableLintingOfRelatedFiles": {
 					"type": "boolean",
 					"default": true,
 					"description": "Lint every file that directly or indirectly references a file that was changed. Enable 'Compile Workspace on Startup' for this to work properly. Because only compiled and buffered files are searched. (restart required)"
@@ -65,7 +65,7 @@
 				},
 				"stexls.delay": {
 					"type": "number",
-					"default": 5,
+					"default": 2,
 					"minimum": 1,
 					"description": "Delay when buffering linting jobs. Linting is buffered for <value> seconds after the user stops typing, opens a file or saves. (restart required)"
 				},
