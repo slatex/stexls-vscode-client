@@ -9,90 +9,107 @@ import {
     TransportKind,
 } from 'vscode-languageclient';
 
-let client: LanguageClient;
-let channel: vscode.OutputChannel;
-
 import * as cp from 'child_process';
-import { extname } from 'path';
 
-export function activate(context: vscode.ExtensionContext) {
-    console.log('Activating stexls client...');
-
-    const config = vscode.workspace.getConfiguration("stexls");
-
-    const interpreter = config.get<string>("pythonInterpreter");
-    const stexlsInstallOptions = config.get<string[]>("stexlsInstallOptions");
-    const logfile = config.get<string>('logfile', '/tmp/stexls.log');
-    const loglevel = config.get<string>('loglevel', 'error');
-
-    channel = vscode.window.createOutputChannel('stexls');
-    context.subscriptions.push(channel);
-    channel.show(true);
-
-    if (!interpreter) {
-        vscode.window.showErrorMessage("You have not selected a python interpreter for Stexls. Open your settings UI and search for 'stexls>pythonInterpreter'.")
-        throw Error("Python interpreter not selected. Unable to start language server.");
-    }
-
+function checkStexlsVersion(interpreter: string, channel: vscode.OutputChannel) {
     const versionCmd = `${interpreter} -m stexls --version`;
     channel.appendLine(`> ${versionCmd}`);
     let version: string | undefined = undefined;
     try {
         version = cp.execSync(versionCmd).toString();
-    } catch (err) {
-        vscode.window.showErrorMessage(
-            "Stexls does not seem to be installed with your interpreter. Do you want to automatically install it?",
-            "No",
-            "Yes"
-        ).then(
-            value => {
-                console.log(`Install stexls selection was: ${value}`)
-                if (value == "Yes" && stexlsInstallOptions !== undefined) {
-                    const installArgs = [interpreter, ...stexlsInstallOptions];
-                    const installCmd = installArgs.join(' ');
-                    console.log(`stexls install cmd: ${installCmd}`);
-                    channel.appendLine(`> ${installCmd}`);
-                    channel.show();
-                    cp.exec(installCmd).on("exit", (code, signal) => {
-                        vscode.window.showInformationMessage('If the stexls installation was successfull (view output channel "stexls"), you can restart the application and it should work.');
-                        channel.appendLine(`> ${versionCmd}`)
-                        const downloaded_version = cp.execSync(versionCmd);
-                        channel.appendLine(downloaded_version.toString());
-                        if (!downloaded_version) {
-                            vscode.window.showInformationMessage('Failed to install stexls.')
-                        }
-                    });
-                }
+        channel.appendLine(version);
+        const [major, minor, revision] = version.split('.');
+        return {
+            'major': parseInt(major),
+            'minor': parseInt(minor),
+            'revision': revision,
+        }
+    } catch (error) {
+        channel.appendLine(error);
+        return undefined;
+    }
+}
+
+async function installOrUpgradeServer(
+    interpreter: string,
+    installOptions: string[] | undefined,
+    channel: vscode.OutputChannel,
+    option: string) {
+    const response = await vscode.window.showInformationMessage(
+        `Stexls is not installed or version did not match. Do you want to ${option.toLowerCase()} the stex language server now?`,
+        'Dismiss',
+        option,
+    )
+    if (response === 'Dismiss') {
+        await vscode.window.showInformationMessage('Stexls was not installed. Restart VSCode to try again.');
+        throw Error('Stexls was not installed.')
+    }
+    if (response === option) {
+        if (installOptions === undefined) {
+            throw Error(`Failed to build the stexls installation command.`)
+        }
+        const installArgs = [interpreter, ...installOptions];
+        const installCmd = installArgs.join(' ');
+        channel.appendLine(`> ${installCmd}`);
+        await (async function () { undefined })();
+        try {
+            cp.execSync(installCmd);
+        } catch (error) {
+            channel.appendLine(error);
+            await vscode.window.showErrorMessage('Failed to install stexls.');
+            return undefined;
+        }
+        return checkStexlsVersion(interpreter, channel);
+    }
+    return undefined;
+}
+
+export async function activate(context: vscode.ExtensionContext) {
+    console.log('Activating stexls client...');
+    const channel = vscode.window.createOutputChannel('stexls');
+    context.subscriptions.push(channel);
+    channel.show(true);
+
+    const config = vscode.workspace.getConfiguration("stexls");
+
+    const interpreter = config.get<string>("pythonInterpreter");
+
+
+    if (!interpreter) {
+        vscode.window.showErrorMessage("You have not selected a python interpreter for Stexls. Open your settings UI and search for 'stexls: Python Interpreter', then restart VSCode.")
+        throw Error("Python interpreter not selected. Unable to start language server.");
+    }
+
+    let version = checkStexlsVersion(interpreter, channel);
+
+    do {
+        const stexlsInstallOptions = config.get<string[]>("stexlsInstallOptions");
+        if (!version) {
+            version = await installOrUpgradeServer(interpreter, stexlsInstallOptions, channel, 'Install');
+        } else {
+            const expectedMajorVersion = 4;
+            const minimumMinorVersion = 5;
+            if (version.major != expectedMajorVersion || version.minor < minimumMinorVersion) {
+                version = await installOrUpgradeServer(interpreter, stexlsInstallOptions, channel, 'Upgrade');
             }
-        )
-        return
-    }
-    channel.appendLine(version);
-    if (!version) {
-        throw Error(`Stexls version check returned falsy "${version}".`);
-    }
-    const [major, minor, revision] = version.split('.');
-    const expectedMajorVersion = 4;
-    const minMinorVersion = 5;
-
-    if (parseInt(major) !== expectedMajorVersion) {
-        throw Error(`Server major version condition not met: Is ${major}, expected ${expectedMajorVersion}`);
-    }
-
-    if (parseInt(minor) < minMinorVersion) {
-        throw Error(`Server minor version condition not met: Is ${minor}, client requries minor>=${minMinorVersion}`);
-    }
+        }
+    } while (!version)
 
     const args = config.get<string[]>("command");
 
     if (!args) {
         throw Error(`Unable to get stexls command arguments. Settings "stexlsCommand" returned falsy: ${args}`);
     }
+
+    const logfile = config.get<string>('logfile', '/tmp/stexls.log');
+
     const sharedArgs = [
         ...args,
         '--logfile',
         logfile
     ];
+
+    const loglevel = config.get<string>('loglevel', 'error');
     const runArgs = [...sharedArgs, "--loglevel", loglevel];
     const debugArgs = [...sharedArgs, "--loglevel", "debug"];
 
@@ -135,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
     };
 
     // Create the language client and start the client.
-    client = new LanguageClient(
+    const client = new LanguageClient(
         'stexls',
         serverOptions,
         clientOptions,
