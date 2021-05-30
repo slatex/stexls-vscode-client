@@ -40,7 +40,7 @@
 				"stexls.compileWorkspaceOnStartupFileLimit": {
 					"type": "integer",
 					"default": 10000,
-					"descriptions": "Maximum number of files the server will pre-compile on startup using multiprocessing with `stexls>numJobs`. Setting this to 0 means, that no files are pre-compiled. Setting it to -1 removes the limit, but that is not recommended. Files outside this limit will still be compiled while you work normally, but without multiprocessing.  (restart required)"
+					"descriptions": "Maximum number of files the server will pre-compile on startup using multiprocessing with `stexls: Num Jobs`. Setting this to 0 means, that no files are pre-compiled. Setting it to -1 removes the limit, but that is not recommended. Files outside this limit will still be compiled while you work normally, but without multiprocessing.  (restart required)"
 				},
 				"stexls.enableTrefier": {
 					"type": "string",
@@ -55,13 +55,13 @@
 				"stexls.enableLintingOfRelatedFiles": {
 					"type": "boolean",
 					"default": true,
-					"description": "Lint every file that directly or indirectly references a file that was changed. Enable 'Compile Workspace on Startup' for this to work properly. Because only compiled and buffered files are searched. (restart required)"
+					"description": "Lint every file that directly or indirectly references a file that was changed. Because only compiled and buffered files are searched this may take some time to work after start up. Setting a high `stexls: Compile Workspace On Startup File Limit` makes this work on startup. (restart required)"
 				},
 				"stexls.numJobs": {
 					"type": "integer",
 					"default": 1,
 					"minimum": 1,
-					"description": "Number of processes used for compilation of the workspace. (restart required)"
+					"description": "Number of processes used for compilation of the workspace."
 				},
 				"stexls.delay": {
 					"type": "number",
@@ -96,6 +96,21 @@
 						"ipc"
 					],
 					"description": "The command executed by the selected python interpreter. This should start the language server. Go to a terminal and type 'python -m stexls lsp --help' for more information. This should never have to change."
+				},
+				"stexls.trefierDownloadLink": {
+					"type": "string",
+					"default": "https://nc.kwarc.info/s/2CFLwK3sNBfd6WW/download",
+					"description": "Link to where the seq2seq.model file is hosted. The model is then downloaded to `~/.stexls/seq2seq.model` if the model file doesn't exist."
+				},
+				"stexls.trefierFileSizeLimitKB": {
+					"type": "integer",
+					"default": 50,
+					"description": "File size limit in Kilobyte until which files will be tagged using the trefier tagger model. If the file is larger than this, it will be ignored."
+				},
+				"stexls.linterFileSizeLimitKB": {
+					"type": "integer",
+					"default": 100,
+					"description": "File size limit in Kilobyte of files that the linter will accept. If the file is larger than this number in Kilobyte, then it will simply ignore the file and not generate diagnostics."
 				}
 			}
 		}

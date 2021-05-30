@@ -194,6 +194,9 @@ export async function activate(context: vscode.ExtensionContext) {
     const enableLintingOfRelatedFiles = config.get<boolean>("enableLintingOfRelatedFiles", false);
     const numJobs = config.get<number>('numJobs', 1);
     const delay = config.get<string>('delay', '1.0');
+    const trefierDownloadLink = config.get<string>('trefierDownloadLink', "");
+    const trefierFileSIzeLimitKB = config.get<number>('trefierFileSIzeLimitKB', 50);
+    const linterFileSizeLimitKB = config.get<number>('linterFileSizeLimitKB', 100);
 
     // Options to control the language client
     let clientOptions: LanguageClientOptions = {
@@ -207,6 +210,9 @@ export async function activate(context: vscode.ExtensionContext) {
             "enableLintingOfRelatedFiles": enableLintingOfRelatedFiles,
             "numJobs": numJobs,
             "delay": delay,
+            "trefierDownloadLink": trefierDownloadLink,
+            "trefierFileSizeLimitKB": trefierFileSIzeLimitKB,
+            "linterFileSizeLimitKB": linterFileSizeLimitKB,
         }
     };
 
