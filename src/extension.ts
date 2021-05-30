@@ -144,7 +144,7 @@ export async function activate(context: vscode.ExtensionContext) {
         } else {
             // Else only ask for upgrade if the version was parsed but is of unexpected value
             const expectedMajorVersion = 4;
-            const minimumMinorVersion = 5;
+            const minimumMinorVersion = 6;
             if (version.major != expectedMajorVersion || version.minor < minimumMinorVersion) {
                 version = await installOrUpgradeServer(interpreter, stexlsInstallOptions, channel, 'Upgrade');
             }
