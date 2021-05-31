@@ -21,7 +21,7 @@ Here are some thing you should do after you first installed the extension.
 ## The Settings
 
 
-First thing you should do after installing is to open the settings UI and searching for `stexls`.
+First thing you should do after installing is to open the settings UI and search for `stexls`.
 
 
 Then confirm that your `stexls: Python Interpreter` setting points to the python executable you want to use.
@@ -51,8 +51,29 @@ You don't have to do anything after you installed the language server and client
 
 Start VSCode and open your stex root directory.
 
-The root must be the folder gimport and importmodule statements are relative to, else it won't work.
+## Flow
 
+The server starts after you open a file assosiated with
+the LaTeX language ID. You can confirm and change the language for the file you current have open by pressing the
+button in the bottom right corner, in case LaTeX is not
+automatically selected for you.
+
+The server will initially compile all files in the workspace (up to the limit from `stexls: Compile Workspace On Startup File Limit`) and report a `Compiling: xxxx files` on the bottom status bar. This number will not until everything is done. This proces is using all the cores specified in `stexls: Num Jobs`, so it may make your computer slow for the time. The server is completely unresponsive until this notification is done.
+
+After the `Compiling: xxxx files` notification is finished,
+a `Linting: xxxx files (eta...)` will appear. This
+progress notification is dynamic and updated regularly.
+You can start editing now and the server will automatically
+prioritize your newly edited files in the linting queue.
+
+# Installing The Backend
+
+This extension runs using a python package located at (https://github.com/slatex/stexls)
+
+Make sure you have properly set python interpreter you want to use.
+
+After you start the extension, it will prompt you to install the server for you. Press the install button and
+everything will done automatically.
 
 # The Root Directory
 
