@@ -18,8 +18,12 @@ Then restart VSCode.
 Here are some thing you should do after you first installed the extension.
 
 
-## The Settings
+## Latex Workshop
 
+If you want more LaTeX features (like syntax highlighting) I recommend installing the LaTeX Workshop extension.
+
+
+## The Settings
 
 First thing you should do after installing is to open the settings UI and search for `stexls`.
 
