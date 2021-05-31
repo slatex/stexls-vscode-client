@@ -15,15 +15,15 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onLanguage:latex"
+		"onLanguage:slatex"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"languages": [
 			{
-				"id": "latex",
+				"id": "slatex",
 				"aliases": [
-					"LaTeX",
+					"sLaTeX",
 					"Latex"
 				],
 				"extensions": [
