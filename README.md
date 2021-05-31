@@ -75,6 +75,11 @@ Make sure you have properly set python interpreter you want to use.
 After you start the extension, it will prompt you to install the server for you. Press the install button and
 everything will done automatically.
 
+
+# Updating the backend
+
+In order to update to the newest version from the git master, you only have to `pip uninstall stexls` using the `pip` from the python interpreter you selected in the settings.
+
 # The Root Directory
 
 The `root directory` is the only directory you should have open in your
@@ -121,6 +126,12 @@ To uninstall simply uninstall the extension from the extensions tab,
 or directly remove this extension's directory from `~/.vscode/extensions`.
 
 
+The extension also generates cache files in the root directory `<root>/.stexls`. You can delete this folder at any time.
+
+
+The tensorflow model is downloaded to `~/.stexls`.
+
+
 # How to compile this yourself
 
 Install `npx` (Node package manager) on your system.
@@ -129,7 +140,7 @@ Download this extension's repository.
 
 Run `npm install` from inside this repository to initialize the development environment.
 
-Don't forget to increment the version number in package.json for continuity's sake.
+Don't forget to increment the version number in `package.json` for continuity's sake.
 
 Execute `npx vsce package` from inside this repository in order to create an installable *.vsix package.
 
